@@ -106,3 +106,15 @@ def intersection_area(r1, r2):
         area = 0.5 * sum(p.x*q.y - p.y*q.x for p, q in
                          zip(intersection, intersection[1:] + intersection[:1]))
     return area, contact_points
+
+
+def circle_points(num, radius, origin=(0, 0)):
+    points = []
+    alpha = 0
+    beta = 2 * pi / num
+    while 2 * pi - alpha > 0.01:
+        p = (origin[0] + radius*cos(alpha), origin[1] + radius*sin(alpha), - alpha/pi*180)
+        points.append(p)
+        alpha += beta
+    return points
+
