@@ -1,4 +1,5 @@
 from math import pi, cos, sin
+from enum import Enum
 
 
 class Vector:
@@ -118,3 +119,11 @@ def circle_points(num, radius, origin=(0, 0)):
         alpha += beta
     return points
 
+
+class CardState(Enum):
+    REST = 1
+    GRABBED = 2
+    RELEASED = 3
+    MOVING = 4
+    MOVED = 5
+    FINAL = 6

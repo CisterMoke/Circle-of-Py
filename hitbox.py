@@ -1,5 +1,3 @@
-import numpy as np
-from math import cos, sin
 from tools import intersection_area, rectangle_vertices
 
 
@@ -48,23 +46,3 @@ class Hitbox:
         r1 = (self.center_x, self.center_y, self.width, self.height, - alpha)
         r2 = (h.center_x, h.center_y, h.width, h.height, - beta)
         return intersection_area(r1, r2)
-
-
-    # def project_old(self, axis):
-    #     points = np.array([(self.x_min, self.y_min), (self.x_min, self.y_max),
-    #               (self.x_max, self.y_min), (self.x_max, self.y_max)])
-    #     projected = [p.dot(axis) for p in points]
-    #     return min(projected), max(projected)
-    #
-    # def overlap_old(self, h, alpha=0, beta):
-    #     a1 = [1, 0]
-    #     a2 = [0, 1]
-    #     a3 = [cos(theta), sin(theta)]
-    #     a4 = [-sin(theta), cos(theta)]
-    #     for a in [a1, a2, a3, a4]:
-    #         i1 = self.project(a)
-    #         i2 = self.project(a)
-    #         if i1[0] > i2[1] or i2[0] > i1[1]:
-    #             return False
-    #     return True
-

@@ -1,5 +1,6 @@
 import numpy as np
 from math import copysign, pi
+from tools import CardState
 
 
 MU_VEL = 0.1
@@ -73,3 +74,23 @@ def normalize(v):
     a = np.array(v)
     a, n = _normalize(a)
     return tuple(a)
+
+
+def interact(card1: dict, card2: dict):
+    res1, res2 = {"hash": card1["hash"], "forces": []}, {"hash": card2["hash"], "forces": []}
+    if card2["hash"] == card1["hash"]:
+        return res1, res2, [], []
+    area, contacts = card1["hitbox"].overlap(card2["hitbox"], alpha=card1["angle"], beta=card2["angle"])
+    if area == 0:
+        return res1, res2, [], []
+    f_norm = area / (card1["area"] * len(contacts))
+    args = [card1["center"], card1["velocity"], -card1["omega"],
+            card2["center"], card2["velocity"], -card2["omega"]]
+    delta_vs = [get_delta_v(p, *args) for p in contacts]
+    fric_forces = [get_fric_force(dv, f_norm) for dv in delta_vs]
+    for force, contact in zip(fric_forces, contacts):
+        if not card1["state"] == CardState.GRABBED:
+            res1["forces"].append(split_force(force, card1["inertia"], contact, card1["center"]))
+        if not card2["state"] == CardState.GRABBED:
+            res2["forces"].append(split_force(mul(force, -1), card2["inertia"], contact, card2["center"]))
+    return res1, res2, contacts, fric_forces

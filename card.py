@@ -1,7 +1,7 @@
 import pygame as pg
-from enum import Enum
 from hitbox import Hitbox
 import physics as ph
+from tools import CardState
 
 
 def card_num_suit_value(card_num):
@@ -31,21 +31,15 @@ def card_num_img(card_num):
         filename = "{s}_{v}.png"
     else:
         filename = "{v}_of_{s}.png"
-    return pg.image.load("cards/"+filename.format(v=value, s=suit))
+    return pg.image.load("cards/"+filename.format(v=value, s=suit)).convert_alpha()
 
 
 CARD_SIZE = (100, 145)
 CARD_IMG = {k: pg.transform.smoothscale(card_num_img(k), CARD_SIZE) for k in range(1, 55)}
-CARD_IMG[0] = pg.transform.smoothscale(pg.image.load("cards/back.png"), CARD_SIZE)
+CARD_IMG[0] = pg.transform.smoothscale(pg.image.load("cards/back.png").convert_alpha(), CARD_SIZE)
 
 
-class CardState(Enum):
-    REST = 1
-    GRABBED = 2
-    RELEASED = 3
-    MOVING = 4
-    MOVED = 5
-    FINAL = 6
+
 
 
 class Card(pg.sprite.Sprite):
@@ -151,23 +145,6 @@ class Card(pg.sprite.Sprite):
         fric_rot = -self.omega if abs(self.omega) < abs(fric_rot) else fric_rot
         self.apply_forces(fric_trans, fric_rot)
 
-    def interact(self, card):
-        area, contacts = self.hitbox.overlap(card.hitbox, alpha=self.angle, beta=card.angle)
-        if area == 0:
-            return [], []
-        # contact_center = ph.mul(ph.add(contacts), 1/len(contacts))
-        f_norm = area / (CARD_SIZE[0]*CARD_SIZE[1] * len(contacts))
-        args = [self.center, self.velocity, -self.omega,
-                card.center, card.velocity, -card.omega]
-        delta_vs = [ph.get_delta_v(p, *args) for p in contacts]
-        fric_forces = [ph.get_fric_force(dv, f_norm) for dv in delta_vs]
-        for force, contact in zip(fric_forces, contacts):
-            if not self.state == CardState.GRABBED:
-                self.apply_forces(*ph.split_force(force, self.inertia, contact, self.center))
-            if not card.state == CardState.GRABBED:
-                card.apply_forces(*ph.split_force(ph.mul(force, -1), self.inertia, contact, card.center))
-        return contacts, fric_forces
-
     def apply_physics(self):
         if self.state != CardState.MOVING:
             return
@@ -177,6 +154,18 @@ class Card(pg.sprite.Sprite):
         self.rotate(self.omega)
         self.apply_fric_force()
 
+    def to_dict(self):
+        return {
+            "hash": self.__hash__(),
+            "hitbox": self.hitbox,
+            "angle": self.angle,
+            "area": CARD_SIZE[0] * CARD_SIZE[1],
+            "center": self.center,
+            "velocity": self.velocity,
+            "omega": self.omega,
+            "state": self.state,
+            "inertia": self.inertia
+        }
 
 
 
