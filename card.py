@@ -39,14 +39,11 @@ CARD_IMG = {k: pg.transform.smoothscale(card_num_img(k), CARD_SIZE) for k in ran
 CARD_IMG[0] = pg.transform.smoothscale(pg.image.load("cards/back.png").convert_alpha(), CARD_SIZE)
 
 
-
-
-
 class Card(pg.sprite.Sprite):
     def __init__(self, card_num=1, center=(0, 0)):
         pg.sprite.Sprite.__init__(self)
-        self.front = CARD_IMG[card_num]
-        self.back = CARD_IMG[0]
+        self.front: pg.surface.Surface = CARD_IMG[card_num]
+        self.back: pg.surface.Surface = CARD_IMG[0]
         self.face_img = [self.back, self.front]
         self.face = 0
 
@@ -61,10 +58,23 @@ class Card(pg.sprite.Sprite):
         self.inertia = (CARD_SIZE[0]**2 + CARD_SIZE[1]**2)/120
 
         self.image = self.get_face()
-        self.rect = self.image.get_rect(center=self.center)
-        self.state = CardState.REST
-        self.hitbox = Hitbox(self.center[0]-CARD_SIZE[0]//2, self.center[1]-CARD_SIZE[1]//2,
+        self.rect: pg.rect.Rect = self.image.get_rect(center=self.center)
+        self.state: CardState = CardState.REST
+        self.hitbox: Hitbox = Hitbox(self.center[0]-CARD_SIZE[0]//2, self.center[1]-CARD_SIZE[1]//2,
                              self.center[0]+CARD_SIZE[0]//2, self.center[1]+CARD_SIZE[1]//2)
+
+    def to_dict(self):
+        return {
+            "hash": self.__hash__(),
+            "hitbox": self.hitbox,
+            "angle": self.angle,
+            "area": CARD_SIZE[0] * CARD_SIZE[1],
+            "center": self.center,
+            "velocity": self.velocity,
+            "omega": self.omega,
+            "state": self.state,
+            "inertia": self.inertia
+        }
 
     def get_face(self):
         return self.face_img[self.face]
@@ -79,6 +89,11 @@ class Card(pg.sprite.Sprite):
         self.image = pg.transform.rotate(self.get_face(), self.angle)
         self.rect = self.image.get_rect(center=self.center)
 
+    def spin(self, angle):
+        self.omega = angle
+        self.rotate(angle)
+        self.state = CardState.MOVED
+
     def translate(self, disp):
         self.center = (self.center[0] + disp[0], self.center[1] + disp[1])
         self.rect.center = self.center
@@ -87,11 +102,6 @@ class Card(pg.sprite.Sprite):
     def move(self, disp):
         self.velocity = disp
         self.translate(disp)
-        self.state = CardState.MOVED
-
-    def spin(self, angle):
-        self.omega = angle
-        self.rotate(angle)
         self.state = CardState.MOVED
 
     def grab(self):
@@ -103,6 +113,12 @@ class Card(pg.sprite.Sprite):
     def rest(self):
         self.velocity = self.delta_v = (0, 0)
         self.omega = self.delta_omega = 0
+
+    def can_rest(self):
+        return ((self.velocity[0]**2 + self.velocity[1]**2 < 0.01)
+                and (self.delta_v[0]**2 + self.delta_v[1]**2 < 0.01)
+                and -0.05 < self.omega < 0.05
+                and -0.05 < self.delta_omega < 0.05)
 
     def update(self):
         if self.state == CardState.GRABBED:
@@ -121,12 +137,8 @@ class Card(pg.sprite.Sprite):
             else:
                 self.apply_physics()
 
-    def can_rest(self):
-        return (ph.bigger_norm((0, 0.1), self.velocity) and ph.bigger_norm((0, 0.1), self.delta_v)
-                and -0.05 < self.omega < 0.05 and -0.05 < self.delta_omega < 0.05)
-
     def update_velocities(self):
-        self.velocity = ph.add([self.velocity, self.delta_v])
+        self.velocity =(self.velocity[0] + self.delta_v[0], self.velocity[1] + self.delta_v[1])
         self.omega += self.delta_omega
         self.delta_v = (0, 0)
         self.delta_omega = 0
@@ -153,21 +165,3 @@ class Card(pg.sprite.Sprite):
         self.translate(self.velocity)
         self.rotate(self.omega)
         self.apply_fric_force()
-
-    def to_dict(self):
-        return {
-            "hash": self.__hash__(),
-            "hitbox": self.hitbox,
-            "angle": self.angle,
-            "area": CARD_SIZE[0] * CARD_SIZE[1],
-            "center": self.center,
-            "velocity": self.velocity,
-            "omega": self.omega,
-            "state": self.state,
-            "inertia": self.inertia
-        }
-
-
-
-
-

@@ -1,70 +1,41 @@
-from math import pi, cos, sin
+from math import pi, cos, sin, radians, degrees
 from enum import Enum
-
-
-class Vector:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def __add__(self, v):
-        if not isinstance(v, Vector):
-            return NotImplemented
-        return Vector(self.x + v.x, self.y + v.y)
-
-    def __sub__(self, v):
-        if not isinstance(v, Vector):
-            return NotImplemented
-        return Vector(self.x - v.x, self.y - v.y)
-
-    def cross(self, v):
-        if not isinstance(v, Vector):
-            return NotImplemented
-        return self.x*v.y - self.y*v.x
-
-    def tuple(self):
-        return self.x, self.y
+import numpy as np
 
 
 class Line:
     # ax + by + c = 0
     def __init__(self, v1, v2):
-        self.a = v2.y - v1.y
-        self.b = v1.x - v2.x
-        self.c = v2.cross(v1)
+        self.a = v2[1] - v1[1]
+        self.b = v1[0] - v2[0]
+        self.c = np.cross(v2, v1)
 
     def __call__(self, p):
-        return self.a*p.x + self.b*p.y + self.c
+        return self.a*p[0] + self.b*p[1] + self.c
 
     def intersection(self, other):
         # See e.g.     https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection#Using_homogeneous_coordinates
         if not isinstance(other, Line):
             return NotImplemented
         w = self.a*other.b - self.b*other.a
-        return Vector(
-            (self.b*other.c - self.c*other.b)/w,
-            (self.c*other.a - self.a*other.c)/w
-        )
+        return np.array(((self.b*other.c - self.c*other.b)/w, (self.c*other.a - self.a*other.c)/w))
 
 
 def rectangle_vertices(cx, cy, w, h, r):
-    angle = pi*r/180
+    angle = radians(r)
     dx = w/2
     dy = h/2
-    dxcos = dx*cos(angle)
-    dxsin = dx*sin(angle)
-    dycos = dy*cos(angle)
-    dysin = dy*sin(angle)
+    rot = np.array(((cos(angle), sin(angle)), (-sin(angle), cos(angle))))
     return (
-        Vector(cx, cy) + Vector(-dxcos + dysin, -dxsin - dycos),
-        Vector(cx, cy) + Vector(dxcos + dysin,  dxsin - dycos),
-        Vector(cx, cy) + Vector(dxcos - dysin,  dxsin + dycos),
-        Vector(cx, cy) + Vector(-dxcos - dysin, -dxsin + dycos)
+        (cx, cy) + np.array((-dx, -dy)).dot(rot),
+        (cx, cy) + np.array((dx, -dy)).dot(rot),
+        (cx, cy) + np.array((dx, dy)).dot(rot),
+        (cx, cy) + np.array((-dx, dy)).dot(rot)
     )
 
 
 def intersection_area(r1, r2):
-    # r1 and r2 are in (center, width, height, rotation) representation
+    # r1 and r2 are in (center_x, center_y, width, height, rotation) representation
     # First convert these into a sequence of vertices
 
     rect1 = rectangle_vertices(*r1)
@@ -100,11 +71,11 @@ def intersection_area(r1, r2):
                 new_intersection.append(intersection_point)
 
         intersection = new_intersection
-    contact_points = [v.tuple() for v in intersection]
+    contact_points = [v for v in intersection]
     area = 0
     # Calculate area
     if len(intersection) > 2:
-        area = 0.5 * sum(p.x*q.y - p.y*q.x for p, q in
+        area = 0.5 * sum(np.cross(p, q) for p, q in
                          zip(intersection, intersection[1:] + intersection[:1]))
     return area, contact_points
 
@@ -114,7 +85,7 @@ def circle_points(num, radius, origin=(0, 0)):
     alpha = 0
     beta = 2 * pi / num
     while 2 * pi - alpha > 0.01:
-        p = (origin[0] + radius*cos(alpha), origin[1] + radius*sin(alpha), - alpha/pi*180)
+        p = (origin[0] + radius*cos(alpha), origin[1] + radius*sin(alpha), - degrees(alpha))
         points.append(p)
         alpha += beta
     return points
