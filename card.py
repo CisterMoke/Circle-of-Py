@@ -1,6 +1,8 @@
 import pygame as pg
-from hitbox import Hitbox
 import physics as ph
+import os
+from config import bundle_dir
+from hitbox import Hitbox
 from tools import CardState
 
 
@@ -25,18 +27,25 @@ def card_num_suit_value(card_num):
     return suit, value
 
 
-def card_num_img(card_num):
+def card_path(card_num):
+    if card_num == 0:
+        return os.path.abspath(os.path.join(bundle_dir, "cards/back.png"))
     suit, value = card_num_suit_value(card_num)
     if value == "joker":
         filename = "{s}_{v}.png"
     else:
         filename = "{v}_of_{s}.png"
-    return pg.image.load("cards/"+filename.format(v=value, s=suit)).convert_alpha()
+    return os.path.abspath(os.path.join(bundle_dir, "cards/"+filename.format(v=value, s=suit)))
+
+
+def card_num_img(card_num):
+    path = card_path(card_num)
+    return pg.image.load(path).convert_alpha()
 
 
 CARD_SIZE = (100, 145)
 CARD_IMG = {k: pg.transform.smoothscale(card_num_img(k), CARD_SIZE) for k in range(1, 55)}
-CARD_IMG[0] = pg.transform.smoothscale(pg.image.load("cards/back.png").convert_alpha(), CARD_SIZE)
+CARD_IMG[0] = pg.transform.smoothscale(card_num_img(0).convert_alpha(), CARD_SIZE)
 
 
 class Card(pg.sprite.Sprite):
