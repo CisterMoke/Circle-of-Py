@@ -38,6 +38,7 @@ class Game:
         self.cards.add(card)
 
     def pause(self):
+        self.release()
         self.paused = True
 
     def resume(self):
@@ -47,6 +48,8 @@ class Game:
         self.over = True
 
     def update(self):
+        if self.paused:
+            return
         self.cards.update()
         for grabbed in self.grabbed:
             dots = []
@@ -69,7 +72,7 @@ class CircleGame(Game):
     def __init__(self):
         super().__init__()
         num_cards = 54
-        radius = 20
+        radius = 200
         center = (ASPECT[0]//2, ASPECT[1]//2)
         c_points = circle_points(num_cards, radius, center)
         for i, p in enumerate(c_points):

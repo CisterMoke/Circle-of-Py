@@ -29,6 +29,9 @@ def game_controls(event: pg.event.Event, game: Game):
             shifts.append(degrees(atan2(rel_y, rel_x)))
     if event.type == pg.MOUSEBUTTONUP and event.button == 1:
         game.release()
+    if event.type == pg.MOUSEBUTTONDOWN and event.button == 3:
+        for card in game.grabbed:
+            card.flip()
     if event.type == pg.MOUSEMOTION:
         if rotate:
             for num, card in enumerate(game.grabbed):

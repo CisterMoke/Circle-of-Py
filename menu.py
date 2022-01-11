@@ -66,8 +66,8 @@ class MainMenu(Menu):
         super().__init__()
 
         # Main Screen
-        play_button = self.Button("Play", *MENU_FONT, center=((ASPECT[0]//2), (ASPECT[1]//2)))
-        quit_button = self.Button("Quit", *MENU_FONT, center=((ASPECT[0]//2), (ASPECT[1]//1.5)))
+        play_button = self.Button("Play", *MENU_FONT, center=((ASPECT[0]//2), (ASPECT[1]*2//5)))
+        quit_button = self.Button("Quit", *MENU_FONT, center=((ASPECT[0]//2), (ASPECT[1]*3//5)))
 
         main_buttons = {"play": play_button,
                         "quit": quit_button}
@@ -81,8 +81,8 @@ class PauseMenu(Menu):
     def __init__(self):
         super().__init__()
 
-        resume_button = self.Button("Resume", *MENU_FONT, center=((ASPECT[0]//2), (ASPECT[1]//2)))
-        quit_button = self.Button("Quit", *MENU_FONT, center=((ASPECT[0]//2), (ASPECT[1]//1.5)))
+        resume_button = self.Button("Resume", *MENU_FONT, center=((ASPECT[0]//2), (ASPECT[1]*2//5)))
+        quit_button = self.Button("Quit", *MENU_FONT, center=((ASPECT[0]//2), (ASPECT[1]*3//5)))
         main_buttons = {"resume": resume_button,
                         "quit": quit_button}
         pause_screen = self.Screen("main", main_buttons)
