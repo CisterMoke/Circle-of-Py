@@ -1,9 +1,5 @@
-import os
-import sys
 import concurrent.futures as cf
 from configparser import ConfigParser
-
-bundle_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
 
 cfg = ConfigParser()
 cfg.read("config.ini")

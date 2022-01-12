@@ -1,7 +1,6 @@
 import pygame as pg
 import physics as ph
 import os
-from config import bundle_dir
 from hitbox import Hitbox
 from tools import CardState
 
@@ -29,13 +28,13 @@ def card_num_suit_value(card_num):
 
 def card_path(card_num):
     if card_num == 0:
-        return os.path.abspath(os.path.join(bundle_dir, "cards/back.png"))
+        return os.path.relpath("cards/back.png")
     suit, value = card_num_suit_value(card_num)
     if value == "joker":
         filename = "{s}_{v}.png"
     else:
         filename = "{v}_of_{s}.png"
-    return os.path.abspath(os.path.join(bundle_dir, "cards/"+filename.format(v=value, s=suit)))
+    return os.path.relpath("cards/"+filename.format(v=value, s=suit))
 
 
 def card_num_img(card_num):

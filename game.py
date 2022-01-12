@@ -1,5 +1,6 @@
 import pygame as pg
 import parallel as par
+import random
 from card import Card
 from config import ASPECT, PROC_POOL
 from typing import List, Tuple
@@ -18,7 +19,7 @@ class Game:
         # self.selected: List[Card] = []
 
     def grab_at(self, x, y):
-        for card in self.cards:
+        for card in reversed(list(self.cards)):
             if card.rect.collidepoint(x, y):
                 self.grabbed.append(card)
                 break
@@ -75,5 +76,8 @@ class CircleGame(Game):
         radius = 200
         center = (ASPECT[0]//2, ASPECT[1]//2)
         c_points = circle_points(num_cards, radius, center)
+
+        nums = list(range(1, num_cards+1))
+        random.shuffle(nums)
         for i, p in enumerate(c_points):
-            self.spawn_at(i+1, p[0], p[1], p[2]+90)
+            self.spawn_at(nums[i], p[0], p[1], p[2]+90)

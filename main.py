@@ -99,66 +99,12 @@ def main():
             curr_game.cards.clear(screen, background)
             updates += curr_game.cards.draw(screen)
 
-
-        #     running = False if event.type == pg.QUIT else True
-        #     if event.type == pg.MOUSEBUTTONDOWN:
-        #         if event.button == 1:
-        #             if grabbed is not None:
-        #                 grabbed.release()
-        #                 grabbed = None
-        #             else:
-        #                 for sprite in circle_cards.sprites():
-        #                     sprite: Card
-        #                     if sprite.rect.collidepoint(event.pos[0], event.pos[1]):
-        #                         sprite.grab()
-        #                         grabbed = sprite
-        #                         break
-        #         if event.button == 3:
-        #             if grabbed is not None:
-        #                 grabbed.flip()
-        #
-        #     if event.type == pg.MOUSEMOTION:
-        #         if grabbed is not None:
-        #             grabbed.move(event.rel)
-        #     if event.type == pg.MOUSEWHEEL:
-        #         if grabbed is not None:
-        #             grabbed.spin(event.y * 5)
-        #
-        # debug_card = grabbed if grabbed is not None else debug_card
-        # circle_cards.update()
-        #
-        # moving_cards.empty()
-        # for card in card_list:
-        #     if card.state != CardState.REST:
-        #         moving_cards.add(card)
-        #
-        #
-        #
-
         fps = font.render(str(int(clock.get_fps())), False, (255, 255, 255))
         fps_rect = fps.get_rect()
         screen.blit(background, (0, 0), fps_rect)
         screen.blit(fps, (0, 0), fps_rect)
         updates.append(fps.get_rect())
-        # debug_text = ("({:0.3f}, {:0.3f}), ({:0.3f}, {:0.3f}), {:0.3f}, {:0.3f}, {}"
-        #               .format(*debug_card.velocity, *debug_card.delta_v, debug_card.omega, debug_card.delta_omega, debug_card.state)
-        #               if debug_card is not None else "")
-        # debug = font.render(debug_text, False, (255, 255, 255))
-        # for dot, force in zip(dots, dvs):
-        #     pg.draw.line(screen, (0, 0, 255), dot, ph.add([dot, ph.mul(force, 10)]), 3)
-        # screen.blit(debug, (0, 0))
-        # hbox = [pg.Rect((x-3, y-3), (6, 6)) for x, y in dots]
-        # surf = pg.Surface((5, 5))
-        # surf.fill((255, 0, 0))
-        # for c in card_list:
-        #     h = c.hitbox
-        #     corners = h.get_rotated(c.angle)
-        #     for x, y in corners:
-        #         rect = pg.Rect((x-3, y-3), (6, 6))
-        #         hbox.append(rect)
-        # for rect in hbox:
-        #     screen.blit(surf, rect)
-        pg.display.update(updates)
+        pg.display.update(list(reversed(updates)))
     pg.quit()
     PROC_POOL.shutdown()
 
